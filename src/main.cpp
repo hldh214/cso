@@ -4,17 +4,17 @@
 #include "USBHIDMouse.h"
 #include "USBHIDKeyboard.h"
 #include "ThreadController.h"
-#include "Adafruit_NeoPixel.h"
+//#include "Adafruit_NeoPixel.h"
 
 USBHIDMouse Mouse;
 USBHIDKeyboard Keyboard;
 
 ThreadController tc = ThreadController();
 
-int bootPin = 0;
-bool isDisabled = false;
+//int bootPin = 0;
+//bool isDisabled = false;
 
-Adafruit_NeoPixel pixels(1, 48, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel pixels(1, 48, NEO_GRB + NEO_KHZ800);
 
 void mouse() {
     // move mouse up
@@ -46,24 +46,24 @@ void move() {
     Keyboard.write('a');
 }
 
-void stop_rgb() {
-    pixels.setPixelColor(0, Adafruit_NeoPixel::Color(0, 0, 0));
-}
-
-void start_rgb() {
-    for (int r = 0; r < 255; r += 10) {
-        for (int g = 0; g < 255; g += 10) {
-            for (int b = 0; b < 255; b += 10) {
-                pixels.setPixelColor(0, Adafruit_NeoPixel::Color(r, g, b));
-                delay(10);
-            }
-        }
-    }
-}
+//void stop_rgb() {
+//    pixels.setPixelColor(0, Adafruit_NeoPixel::Color(0, 0, 0));
+//}
+//
+//void start_rgb() {
+//    for (int r = 0; r < 255; r += 10) {
+//        for (int g = 0; g < 255; g += 10) {
+//            for (int b = 0; b < 255; b += 10) {
+//                pixels.setPixelColor(0, Adafruit_NeoPixel::Color(r, g, b));
+//                delay(10);
+//            }
+//        }
+//    }
+//}
 
 void setup() {
-    pinMode(bootPin, INPUT_PULLUP);
-    pixels.begin();
+//    pinMode(bootPin, INPUT_PULLUP);
+//    pixels.begin();
 
     Mouse.begin();
     Keyboard.begin();
@@ -71,7 +71,7 @@ void setup() {
 
     auto *mouseThread = new Thread();
     mouseThread->onRun(mouse);
-    mouseThread->setInterval(4000);
+    mouseThread->setInterval(8000);
 
     auto *buyWeaponThread = new Thread();
     buyWeaponThread->onRun(buy_weapon);
@@ -85,25 +85,27 @@ void setup() {
     moveThread->onRun(move);
     moveThread->setInterval(2000);
 
-    auto *rgbThread = new Thread();
-    rgbThread->onRun(start_rgb);
-    rgbThread->setInterval(10);
+//    auto *rgbThread = new Thread();
+//    rgbThread->onRun(start_rgb);
+//    rgbThread->setInterval(10);
 
     tc.add(mouseThread);
     tc.add(buyWeaponThread);
     tc.add(fireThread);
     tc.add(moveThread);
-    tc.add(rgbThread);
+//    tc.add(rgbThread);
 }
 
 void loop() {
-    if (digitalRead(bootPin) == LOW) {
-        isDisabled = !isDisabled;
-    }
+    tc.run();
 
-    if (!isDisabled) {
-        tc.run();
-    } else {
-        stop_rgb();
-    }
+//    if (digitalRead(bootPin) == LOW) {
+//        isDisabled = !isDisabled;
+//    }
+//
+//    if (!isDisabled) {
+//        tc.run();
+//    } else {
+//        stop_rgb();
+//    }
 }
