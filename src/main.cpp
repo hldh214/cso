@@ -32,8 +32,8 @@ bool running = false;
     while (true) {
         // press 'b' key
         Keyboard.write('b');
-        // press 'f' key for melee weapon
-        Keyboard.write('f');
+        // press 's' key for melee weapon
+        Keyboard.write('s');
         // press '3' key for melee weapon
         Keyboard.write('3');
 
