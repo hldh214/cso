@@ -4,9 +4,13 @@
 #include <USB.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <Bounce2.h>
+
 
 #define LED_PIN 48
 #define BOOT_PIN 0
+
+Bounce2::Button bootButton = Bounce2::Button(); // INSTANTIATE A Bounce2::Button OBJECT
 
 USBHIDMouse Mouse;
 USBHIDKeyboard Keyboard;
@@ -20,9 +24,9 @@ bool running = false;
 
 [[noreturn]] void mouseTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
-        Mouse.move(0, -1);
+        Mouse.move(0, -10);
         vTaskDelay(pdMS_TO_TICKS(10));
-        Mouse.move(0, 1);
+        Mouse.move(0, 10);
 
         vTaskDelay(pdMS_TO_TICKS(8000));
     }
@@ -32,10 +36,14 @@ bool running = false;
     while (true) {
         // press 'b' key
         Keyboard.write('b');
+        vTaskDelay(pdMS_TO_TICKS(50));
         // press 's' key for melee weapon
         Keyboard.write('s');
+        vTaskDelay(pdMS_TO_TICKS(50));
         // press '3' key for melee weapon
         Keyboard.write('3');
+        // press 'f2' key for auto buying
+        Keyboard.write(KEY_F2);
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
@@ -44,7 +52,13 @@ bool running = false;
 [[noreturn]] void fireTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
         // press 'p' key
-        Keyboard.write('p');
+        Keyboard.press('p');
+        // press 'w' key
+        Keyboard.press('w');
+
+        vTaskDelay(pdMS_TO_TICKS(2000));
+
+        Keyboard.releaseAll();
 
         vTaskDelay(pdMS_TO_TICKS(200));
     }
@@ -52,17 +66,13 @@ bool running = false;
 
 [[noreturn]] void moveTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
-        // press 'w' key
-        Keyboard.write('w');
-        // press 'a' key
-        Keyboard.write('a');
+        // press 'KEY_RIGHT_ARROW' key
+        Keyboard.press(KEY_RIGHT_ARROW);
+        vTaskDelay(pdMS_TO_TICKS(500));
+        Keyboard.releaseAll();
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(3000));
     }
-}
-
-void bootPressed() {
-    running = !running;
 }
 
 __attribute__((unused)) void setup() {
@@ -71,9 +81,12 @@ __attribute__((unused)) void setup() {
     USB.begin();
 
     pinMode(LED_PIN, OUTPUT);
+    pinMode(BOOT_PIN, INPUT_PULLUP);
     digitalWrite(LED_PIN, LOW);
 
-    attachInterrupt(BOOT_PIN, bootPressed, FALLING);
+    bootButton.attach(BOOT_PIN, INPUT_PULLUP);
+    bootButton.interval(5);
+    bootButton.setPressedState(LOW);
 
     xTaskCreate(mouseTask, "Mouse Task", 2048, nullptr, 1, &mouseTaskHandle);
     xTaskCreate(buyTask, "Buy Task", 2048, nullptr, 1, &buyTaskHandle);
@@ -88,6 +101,13 @@ __attribute__((unused)) void setup() {
 }
 
 void loop() {
+    // UPDATE THE BUTTON BY CALLING .update() AT THE BEGINNING OF THE LOOP:
+    bootButton.update();
+
+    if (bootButton.pressed()) {
+        running = !running;
+    }
+
     if (running) {
         digitalWrite(LED_PIN, HIGH);
         vTaskResume(mouseTaskHandle);
