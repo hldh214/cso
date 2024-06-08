@@ -17,8 +17,8 @@ USBHIDKeyboard Keyboard;
 
 TaskHandle_t mouseTaskHandle;
 TaskHandle_t buyTaskHandle;
-TaskHandle_t fireTaskHandle;
-TaskHandle_t moveTaskHandle;
+TaskHandle_t F2AndReviveTaskHandle;
+TaskHandle_t moveAndFireTaskHandle;
 
 bool running = false;
 
@@ -42,38 +42,36 @@ bool running = false;
         vTaskDelay(pdMS_TO_TICKS(50));
         // press '3' key for melee weapon
         Keyboard.write('3');
-        // press 'f2' key for auto buying
-        Keyboard.write(KEY_F2);
-        // press 'r' key for revive
-        Keyboard.write('r');
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 
-[[noreturn]] void fireTask(__attribute__((unused)) void *pvParameters) {
+[[noreturn]] void F2AndReviveTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
-        // press 'p' key
-        Keyboard.press('p');
-        // press 'w' key
-        Keyboard.press('w');
+        // press 'f2' key for auto buying
+        Keyboard.write(KEY_F2);
+        vTaskDelay(pdMS_TO_TICKS(50));
+        // press 'r' key for revive
+        Keyboard.write('r');
 
-        vTaskDelay(pdMS_TO_TICKS(6000));
-
-        Keyboard.releaseAll();
-
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }
 
-[[noreturn]] void moveTask(__attribute__((unused)) void *pvParameters) {
+[[noreturn]] void moveAndFireTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
-        // press 'KEY_RIGHT_ARROW' key
+        Keyboard.press('p');
+        Keyboard.press('w');
         Keyboard.press(KEY_RIGHT_ARROW);
-        vTaskDelay(pdMS_TO_TICKS(500));
-        Keyboard.releaseAll();
 
-        vTaskDelay(pdMS_TO_TICKS(3000));
+        vTaskDelay(pdMS_TO_TICKS(6000));
+
+        Keyboard.release('p');
+        Keyboard.release('w');
+        Keyboard.release(KEY_RIGHT_ARROW);
+
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -92,14 +90,14 @@ __attribute__((unused)) void setup() {
 
     xTaskCreate(mouseTask, "Mouse Task", 2048, nullptr, 1, &mouseTaskHandle);
     xTaskCreate(buyTask, "Buy Task", 2048, nullptr, 1, &buyTaskHandle);
-    xTaskCreate(fireTask, "Fire Task", 2048, nullptr, 1, &fireTaskHandle);
-    xTaskCreate(moveTask, "Move Task", 2048, nullptr, 1, &moveTaskHandle);
+    xTaskCreate(F2AndReviveTask, "F2 And Revive Task", 2048, nullptr, 1, &F2AndReviveTaskHandle);
+    xTaskCreate(moveAndFireTask, "Move And Fire Task", 2048, nullptr, 1, &moveAndFireTaskHandle);
 
     // fixme: this is so ugly...
     vTaskSuspend(mouseTaskHandle);
     vTaskSuspend(buyTaskHandle);
-    vTaskSuspend(fireTaskHandle);
-    vTaskSuspend(moveTaskHandle);
+    vTaskSuspend(F2AndReviveTaskHandle);
+    vTaskSuspend(moveAndFireTaskHandle);
 }
 
 void loop() {
@@ -114,14 +112,14 @@ void loop() {
         digitalWrite(LED_PIN, HIGH);
         vTaskResume(mouseTaskHandle);
         vTaskResume(buyTaskHandle);
-        vTaskResume(fireTaskHandle);
-        vTaskResume(moveTaskHandle);
+        vTaskResume(F2AndReviveTaskHandle);
+        vTaskResume(moveAndFireTaskHandle);
     } else {
         Keyboard.releaseAll();
         digitalWrite(LED_PIN, LOW);
         vTaskSuspend(mouseTaskHandle);
         vTaskSuspend(buyTaskHandle);
-        vTaskSuspend(fireTaskHandle);
-        vTaskSuspend(moveTaskHandle);
+        vTaskSuspend(F2AndReviveTaskHandle);
+        vTaskSuspend(moveAndFireTaskHandle);
     }
 }
