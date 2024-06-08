@@ -117,6 +117,7 @@ void loop() {
         vTaskResume(fireTaskHandle);
         vTaskResume(moveTaskHandle);
     } else {
+        Keyboard.releaseAll();
         digitalWrite(LED_PIN, LOW);
         vTaskSuspend(mouseTaskHandle);
         vTaskSuspend(buyTaskHandle);
