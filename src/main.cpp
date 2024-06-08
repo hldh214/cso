@@ -44,6 +44,8 @@ bool running = false;
         Keyboard.write('3');
         // press 'f2' key for auto buying
         Keyboard.write(KEY_F2);
+        // press 'r' key for revive
+        Keyboard.write('r');
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
@@ -56,11 +58,11 @@ bool running = false;
         // press 'w' key
         Keyboard.press('w');
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(6000));
 
         Keyboard.releaseAll();
 
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
