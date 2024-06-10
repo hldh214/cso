@@ -34,7 +34,6 @@ bool running = false;
 
 [[noreturn]] void buyTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
-        // press 'b' key
         Keyboard.write('b');
         vTaskDelay(pdMS_TO_TICKS(50));
         // press 's' key for melee weapon
@@ -42,6 +41,11 @@ bool running = false;
         vTaskDelay(pdMS_TO_TICKS(50));
         // press '3' key for melee weapon
         Keyboard.write('3');
+
+        Keyboard.write('b');
+        vTaskDelay(pdMS_TO_TICKS(50));
+        // press 'ESC' key for close the popup window
+        Keyboard.write(KEY_ESC);
 
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
@@ -55,7 +59,7 @@ bool running = false;
         // press 'r' key for revive
         Keyboard.write('r');
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
