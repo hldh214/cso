@@ -54,11 +54,13 @@ void mouseClick(uint8_t button = MOUSE_LEFT) {
         vTaskDelay(pdMS_TO_TICKS(50));
         // press '3' key for melee weapon
         Keyboard.write('3');
+        vTaskDelay(pdMS_TO_TICKS(50));
 
         Keyboard.write('b');
         vTaskDelay(pdMS_TO_TICKS(50));
         // press 'ESC' key for close the popup window
         Keyboard.write(KEY_ESC);
+        vTaskDelay(pdMS_TO_TICKS(50));
 
         // press 'r' key for revive
         Keyboard.write('r');
