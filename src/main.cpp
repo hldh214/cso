@@ -3,6 +3,7 @@
 #include <AbsMouse.h>
 #include <Keyboard.h>
 #include <Arduino_FreeRTOS.h>
+#include <semphr.h>
 
 
 //#define LED_PIN 48
@@ -17,11 +18,14 @@ TaskHandle_t moveAndFireTaskHandle;
 
 bool running = true;
 
+SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
+
 void mouseClick(uint8_t button = MOUSE_LEFT) {
     AbsMouse.press(button);
     vTaskDelay(pdMS_TO_TICKS(50));
     AbsMouse.release(button);
 }
+
 
 [[noreturn]] void mouseTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
@@ -41,6 +45,7 @@ void mouseClick(uint8_t button = MOUSE_LEFT) {
 
 [[noreturn]] void buyTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
+        xSemaphoreTake(mutex, portMAX_DELAY);
         Keyboard.write('b');
         vTaskDelay(pdMS_TO_TICKS(50));
         // press 's' key for melee weapon
@@ -65,16 +70,21 @@ void mouseClick(uint8_t button = MOUSE_LEFT) {
         // press 'r' key for revive
         Keyboard.write('r');
 
+        xSemaphoreGive(mutex);
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 
 [[noreturn]] void F2AndReviveTask(__attribute__((unused)) void *pvParameters) {
     while (true) {
+        xSemaphoreTake(mutex, portMAX_DELAY);
+
         // press 'f2' key for auto buying
         Keyboard.write(KEY_F2);
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        xSemaphoreGive(mutex);
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
