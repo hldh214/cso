@@ -69,6 +69,10 @@ void mouseClick(uint8_t button = MOUSE_LEFT) {
 
         // press 'r' key for revive
         Keyboard.write('r');
+        vTaskDelay(pdMS_TO_TICKS(50));
+
+        // press '7' key for ability
+        Keyboard.write('7');
 
         xSemaphoreGive(mutex);
         vTaskDelay(pdMS_TO_TICKS(5000));
